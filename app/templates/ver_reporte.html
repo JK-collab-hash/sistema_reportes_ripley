@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block header_title %}Detalle del reporte{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Reporte registrado e inmodificable</h1>
+        <p>Consulta final del registro creado por el usuario.</p>
+    </div>
+    <span class="green-pill">Solo lectura</span>
+</div>
+
+<section class="detail-layout">
+    <div class="detail-card">
+        <div class="detail-grid">
+            <div><small>CÓDIGO</small><strong>{{ reporte.codigo }}</strong></div>
+            <div><small>CAMIÓN</small><strong>{{ reporte.camion.nombre }}</strong></div>
+            <div><small>FECHA</small><strong>{{ reporte.fecha_registro.strftime('%d/%m/%Y - %I:%M %p') }}</strong></div>
+            <div><small>RESPONSABLE</small><strong>{{ reporte.usuario.nombre_completo() }}</strong></div>
+        </div>
+
+        <h3>Productos registrados</h3>
+        <table class="report-table compact">
+            <thead>
+                <tr><th>Producto</th><th>Cantidad</th><th>Tipo</th><th>Observación</th></tr>
+            </thead>
+            <tbody>
+                {% for detalle in reporte.detalles %}
+                <tr>
+                    <td><strong>{{ detalle.nombre_producto }}</strong></td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>{{ detalle.categoria.nombre }}</td>
+                    <td>{{ detalle.observacion or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Comentarios e incidencias</h3>
+        <div class="readonly-box">{{ reporte.incidencias or reporte.comentarios or 'Sin incidencias registradas.' }}</div>
+    </div>
+
+    <aside class="side-checks">
+        <div class="validation-card">
+            <h3>Estado final</h3>
+            <span class="green-pill">✓ Guardado correctamente</span>
+            <p>El reporte queda visible para consulta histórica, pero no para edición.</p>
+        </div>
+
+        <div class="validation-card">
+            <h3>Predicción ML</h3>
+            {% if prediccion_ml.clase == 'Riesgo' %}
+            <span class="risk-pill">Riesgo operativo</span>
+            <p>Probabilidad de riesgo: <strong>{{ '%.2f'|format(prediccion_ml.prob_riesgo * 100) }}%</strong></p>
+            <p>Recomendación: revisar reposición y generar alerta logística.</p>
+            {% else %}
+            <span class="green-pill">Estado normal</span>
+            <p>Probabilidad normal: <strong>{{ '%.2f'|format(prediccion_ml.prob_normal * 100) }}%</strong></p>
+            <p>Recomendación: mantener seguimiento por reportes.</p>
+            {% endif %}
+        </div>
+
+        <div class="validation-card">
+            <h3>Propósito UX</h3>
+            <p>Evitar alteraciones posteriores y mantener evidencia confiable del movimiento de mercadería.</p>
+        </div>
+    </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,19 @@
+Variable,Importancia
+stock_estimado,0.2612660926347779
+cantidad_total,0.21834185489320143
+tiene_incidencia,0.21437525011391514
+tiempo_reposicion_dias,0.1857212387410798
+demanda_semanal,0.06500576711457925
+unidades_transito,0.02334345169310458
+stock_minimo,0.012181343455222914
+camion_Camión 05,0.012069422989878658
+dias_sin_reposicion,0.007534450065452454
+categoria_Electrodoméstico,0.0001611282987879853
+numero_productos,0.0
+categoria_Muebles,0.0
+categoria_Tecnología,0.0
+categoria_Ropa,0.0
+camion_Camión 03,0.0
+camion_Camión 06,0.0
+rotacion_producto_Baja,0.0
+rotacion_producto_Media,0.0

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Sistema de Reportes Ripley{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% if session.get('usuario_id') %}
+    <nav class="topbar">
+        <div class="brand">
+            <span class="brand-icon">R</span>
+            <div>
+                <small>Sistema de gestión de mercadería</small>
+                <strong>{% block header_title %}Dashboard de reportes{% endblock %}</strong>
+            </div>
+        </div>
+        <div class="top-actions">
+            <span class="user-chip">Usuario: <strong>{{ session.get('usuario_nombre') }}</strong></span>
+            <a href="{{ url_for('reportes.nuevo_reporte') }}" class="btn-primary">+ Nuevo reporte</a>
+            <a href="{{ url_for('ml.dashboard_ml') }}" class="btn-secondary">ML</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn-ghost">Salir</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content {% if not session.get('usuario_id') %}main-login{% endif %}">
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                <div class="flash-wrapper">
+                    {% for categoria, mensaje in mensajes %}
+                        <div class="flash {{ categoria }}">{{ mensaje }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

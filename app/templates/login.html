@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión | Ripley{% endblock %}
+{% block content %}
+<section class="login-screen">
+    <div class="login-left">
+        <span class="pill-dark">PROTOTIPO UX - RIPLEY</span>
+        <h1>Acceso seguro para registrar y consultar reportes de flujo de mercadería.</h1>
+        <p>La interfaz prioriza claridad, trazabilidad y una entrada rápida al sistema.</p>
+        <div class="login-features">
+            <div><small>01</small><strong>Usuario autorizado</strong></div>
+            <div><small>02</small><strong>Registro digital</strong></div>
+            <div><small>03</small><strong>Reportes inmodificables</strong></div>
+        </div>
+    </div>
+
+    <div class="login-right">
+        <form class="login-card" method="post">
+            <div class="login-icon">↳</div>
+            <h2>Iniciar sesión</h2>
+            <p>Acceso del personal encargado de los reportes operativos.</p>
+
+            <label>Correo del usuario</label>
+            <input type="text" name="usuario" value="jose.alguay@ripley.pe" required>
+
+            <label>Contraseña</label>
+            <input type="password" name="contrasena" value="123456" required>
+
+            <button type="submit" class="btn-full">➜ Ingresar al sistema</button>
+            <small class="hint">Demo: jose.alguay@ripley.pe / 123456</small>
+        </form>
+    </div>
+</section>
+{% endblock %}

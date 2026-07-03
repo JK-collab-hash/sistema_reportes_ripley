@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block header_title %}Módulo inteligente ML{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Módulo inteligente de riesgo operativo</h1>
+        <p>Implementación y validación de Machine Learning para apoyar la optimización del flujo de mercadería.</p>
+    </div>
+    <span class="code-pill">Árbol de Decisión</span>
+</div>
+
+<section class="dashboard-grid four">
+    <div class="metric-card"><small>Accuracy</small><strong>{{ '%.4f'|format(metricas.accuracy) }}</strong></div>
+    <div class="metric-card"><small>Precision</small><strong>{{ '%.4f'|format(metricas.precision) }}</strong></div>
+    <div class="metric-card"><small>Recall</small><strong>{{ '%.4f'|format(metricas.recall) }}</strong></div>
+    <div class="metric-card"><small>F1 Score</small><strong>{{ '%.4f'|format(metricas.f1) }}</strong></div>
+</section>
+
+<section class="ml-layout">
+    <div class="table-card">
+        <h2>Predicción interactiva</h2>
+        <p>Ingrese datos operativos para clasificar el estado de una mercadería.</p>
+
+        <form method="post" class="ml-form">
+            <div class="form-row three">
+                <div class="field">
+                    <label>Categoría</label>
+                    <select name="categoria">
+                        {% for item in categorias %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Camión</label>
+                    <select name="camion">
+                        {% for item in camiones %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Rotación</label>
+                    <select name="rotacion_producto">
+                        {% for item in rotaciones %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row three">
+                <div class="field"><label>Cantidad total</label><input type="number" name="cantidad_total" value="24" min="0"></div>
+                <div class="field"><label>Número de productos</label><input type="number" name="numero_productos" value="1" min="1"></div>
+                <div class="field"><label>Stock estimado</label><input type="number" name="stock_estimado" value="18" min="0"></div>
+            </div>
+
+            <div class="form-row three">
+                <div class="field"><label>Stock mínimo</label><input type="number" name="stock_minimo" value="35" min="0"></div>
+                <div class="field"><label>Demanda semanal</label><input type="number" name="demanda_semanal" value="80" min="0"></div>
+                <div class="field"><label>Unidades en tránsito</label><input type="number" name="unidades_transito" value="10" min="0"></div>
+            </div>
+
+            <div class="form-row three">
+                <div class="field"><label>Tiempo de reposición</label><input type="number" name="tiempo_reposicion_dias" value="9" min="0"></div>
+                <div class="field"><label>Días sin reposición</label><input type="number" name="dias_sin_reposicion" value="18" min="0"></div>
+                <div class="field">
+                    <label>Incidencia</label>
+                    <select name="tiene_incidencia"><option value="1">Sí</option><option value="0">No</option></select>
+                </div>
+            </div>
+
+            <button class="btn-primary" type="submit">Predecir riesgo operativo</button>
+        </form>
+
+        {% if resultado %}
+        <div class="result-panel {% if resultado.clase == 'Riesgo' %}danger{% else %}ok{% endif %}">
+            <h3>Resultado de la predicción</h3>
+            {% if resultado.clase == 'Riesgo' %}
+            <strong>El producto presenta RIESGO OPERATIVO.</strong>
+            <p>Recomendación: priorizar reposición, revisar stock y generar alerta logística.</p>
+            {% else %}
+            <strong>El producto se encuentra en estado NORMAL.</strong>
+            <p>Recomendación: mantener seguimiento mediante reportes periódicos.</p>
+            {% endif %}
+            <div class="summary-row">
+                <span>Normal: <strong>{{ '%.2f'|format(resultado.prob_normal * 100) }}%</strong></span>
+                <span>Riesgo: <strong>{{ '%.2f'|format(resultado.prob_riesgo * 100) }}%</strong></span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <aside class="side-checks">
+        <div class="validation-card">
+            <h3>Dataset ML</h3>
+            <p>Registros simulados: <strong>{{ dataset|length }}</strong></p>
+            <p>Variables: stock, demanda, reposición, incidencias, rotación y cantidad.</p>
+        </div>
+        <div class="validation-card">
+            <h3>Variable objetivo</h3>
+            <span class="risk-pill">riesgo_operativo</span>
+            <p>Clasifica cada caso como Normal o Riesgo.</p>
+        </div>
+    </aside>
+</section>
+
+<section class="table-card">
+    <h2>Análisis exploratorio y validación</h2>
+    <div class="image-grid">
+        <div><img src="{{ url_for('static', filename='img/ml_distribucion_riesgo.png') }}" alt="Distribución"><p>Distribución de clases</p></div>
+        <div><img src="{{ url_for('static', filename='img/ml_hist_cantidad.png') }}" alt="Histograma"><p>Histograma</p></div>
+        <div><img src="{{ url_for('static', filename='img/ml_boxplot_reposicion.png') }}" alt="Boxplot"><p>Boxplot</p></div>
+        <div><img src="{{ url_for('static', filename='img/ml_stock_demanda.png') }}" alt="Dispersión"><p>Dispersión</p></div>
+        <div><img src="{{ url_for('static', filename='img/ml_correlacion.png') }}" alt="Correlación"><p>Matriz de correlación</p></div>
+        <div><img src="{{ url_for('static', filename='img/ml_matriz_confusion.png') }}" alt="Matriz"><p>Matriz de confusión</p></div>
+    </div>
+</section>
+
+<section class="table-card">
+    <h2>Variables más importantes del modelo</h2>
+    <img class="wide-img" src="{{ url_for('static', filename='img/ml_importancia.png') }}" alt="Importancia de variables">
+    <table class="report-table compact">
+        <thead><tr><th>Variable</th><th>Importancia</th></tr></thead>
+        <tbody>
+        {% for row in importancia.head(10).itertuples() %}
+            <tr><td>{{ row.Variable }}</td><td>{{ '%.4f'|format(row.Importancia) }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section class="table-card">
+    <h2>Vista del dataset usado para Machine Learning</h2>
+    <table class="report-table compact">
+        <thead>
+            <tr>
+                <th>Categoría</th><th>Camión</th><th>Cantidad</th><th>Stock</th><th>Demanda</th><th>Reposición</th><th>Riesgo</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in dataset.head(12).itertuples() %}
+            <tr>
+                <td>{{ row.categoria }}</td>
+                <td>{{ row.camion }}</td>
+                <td>{{ row.cantidad_total }}</td>
+                <td>{{ row.stock_estimado }}</td>
+                <td>{{ row.demanda_semanal }}</td>
+                <td>{{ row.tiempo_reposicion_dias }} días</td>
+                <td><span class="{% if row.riesgo_operativo == 'Riesgo' %}risk-pill{% else %}green-pill{% endif %}">{{ row.riesgo_operativo }}</span></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

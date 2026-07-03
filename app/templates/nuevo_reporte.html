@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block header_title %}Crear nuevo reporte{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Nuevo reporte de mercadería</h1>
+        <p>Formulario digital para registrar la carga del camión.</p>
+    </div>
+    <span class="code-pill">{{ codigo }}</span>
+</div>
+
+<section class="form-layout">
+    <form class="report-form" method="post">
+        <div class="form-row">
+            <div class="field">
+                <label>Camión / unidad</label>
+                <select name="camion_id" required>
+                    <option value="">Seleccione camión</option>
+                    {% for camion in camiones %}
+                    <option value="{{ camion.id }}">{{ camion.nombre }} - {{ camion.placa }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Fecha y hora</label>
+                <input type="text" value="19/05/2026 - 03:20 p. m." readonly>
+            </div>
+        </div>
+
+        <div class="products-head">
+            <h3>Productos transportados</h3>
+            <button type="button" class="btn-soft" onclick="agregarProducto()">+ Agregar producto</button>
+        </div>
+
+        <div id="productos-container">
+            <div class="product-box">
+                <strong>Producto 1</strong>
+                <div class="product-grid">
+                    <input type="text" name="nombre_producto[]" placeholder="Televisores LED" required>
+                    <input type="number" name="cantidad[]" placeholder="24" min="1" required>
+                    <select name="categoria_id[]" required>
+                        <option value="">Tipo</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="observacion[]" placeholder="Observación opcional">
+                </div>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Comentarios sobre incidencias o sospechas</label>
+            <textarea name="incidencias" placeholder="Se detectó una caja con embalaje ligeramente deteriorado."></textarea>
+        </div>
+
+        <div class="field">
+            <label>Comentarios generales</label>
+            <textarea name="comentarios" placeholder="Registro validado por el personal de garita."></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn-primary" type="submit">➜ Guardar reporte</button>
+        </div>
+    </form>
+
+    <aside class="side-checks">
+        {% if errores %}
+        <div class="validation-card warning">
+            <h3>Faltan datos</h3>
+            <p>El sistema avisa antes del guardado si un campo obligatorio queda vacío.</p>
+            {% for error in errores %}
+            <span class="danger-item">• {{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="validation-card">
+            <h3>Validación previa</h3>
+            <p>El sistema revisa los campos obligatorios antes de guardar.</p>
+            <span>✓ Camión</span>
+            <span>✓ Producto</span>
+            <span>✓ Cantidad</span>
+        </div>
+
+        <div class="validation-card">
+            <h3>Regla del registro</h3>
+            <p>Después de confirmar, el reporte queda disponible en modo inmodificable.</p>
+        </div>
+    </aside>
+</section>
+{% endblock %}

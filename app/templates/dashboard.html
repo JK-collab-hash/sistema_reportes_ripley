@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block header_title %}Dashboard de reportes{% endblock %}
+{% block content %}
+<section class="dashboard-grid">
+    <div class="hero-card">
+        <span class="mini-pill">Panel principal</span>
+        <h1>Control centralizado de mercadería y reportes</h1>
+        <p>Consultar, crear y validar registros desde un mismo entorno.</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Resumen</h3>
+        <div class="summary-row">
+            <span><strong>{{ '%02d'|format(total_reportes) }}</strong> Reportes</span>
+            <span><strong>{{ '%02d'|format(total_productos) }}</strong> Productos</span>
+        </div>
+        <span class="status-pill active">Activo estado</span>
+    </div>
+</section>
+
+<section class="table-card">
+    <div class="section-head">
+        <div>
+            <h2>Reportes registrados</h2>
+            <p>Búsqueda por código, camión o producto</p>
+        </div>
+        <form class="search-form" method="get">
+            <input type="text" name="q" value="{{ busqueda }}" placeholder="🔎 Buscar reporte">
+        </form>
+    </div>
+
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Fecha</th>
+                <th>Camión</th>
+                <th>Producto</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reporte in reportes %}
+            <tr>
+                <td><strong>{{ reporte.codigo }}</strong></td>
+                <td>{{ reporte.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                <td>{{ reporte.camion.nombre }}</td>
+                <td>{{ reporte.detalles[0].nombre_producto if reporte.detalles else 'Sin producto' }}</td>
+                <td><span class="green-pill">Registrado</span></td>
+                <td><a href="{{ url_for('reportes.ver_reporte', reporte_id=reporte.id) }}" class="btn-dark">👁 Ver</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="empty">No se encontraron reportes.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
