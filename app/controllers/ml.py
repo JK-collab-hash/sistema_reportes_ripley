@@ -2,9 +2,7 @@ from flask import Blueprint, render_template, request
 from app.controllers.reportes import login_required
 from app.services.ml_service import obtener_modelo_ml, predecir, CATEGORIAS_ML, ROTACIONES_ML, TIPOS_CAMION_ML
 
-
 ml_bp = Blueprint("ml", __name__, url_prefix="/ml")
-
 
 @ml_bp.route("/dashboard", methods=["GET", "POST"])
 @login_required
@@ -35,6 +33,8 @@ def dashboard_ml():
         dataset=obj["dataset"],
         metricas=obj["metricas"],
         importancia=obj["importancia"],
+        total_anomalias=obj.get("total_anomalias", 0),
+        total_clusters=obj.get("total_clusters", 0),
         resultado=resultado,
         datos_ingresados=datos_ingresados,
         categorias=CATEGORIAS_ML,

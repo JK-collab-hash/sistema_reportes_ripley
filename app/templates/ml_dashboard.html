@@ -111,6 +111,25 @@
     </div>
 </section>
 
+<!-- ¡NUEVA SECCIÓN: Algoritmos no supervisados! -->
+<section class="table-card">
+    <h2>Algoritmos No Supervisados (DBSCAN y Mean-Shift)</h2>
+    <div style="margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap;">
+        <p><strong>Total de Anomalías Detectadas (DBSCAN):</strong> <span class="risk-pill">{{ total_anomalias }} registros</span></p>
+        <p><strong>Clústeres de Mercadería (Mean-Shift):</strong> <span class="green-pill">{{ total_clusters }} grupos</span></p>
+    </div>
+    <div class="image-grid">
+        <div>
+            <img src="{{ url_for('static', filename='img/ml_dbscan_anomalias.png') }}" alt="Anomalías DBSCAN">
+            <p>Detección de anomalías logísticas (DBSCAN)</p>
+        </div>
+        <div>
+            <img src="{{ url_for('static', filename='img/ml_meanshift_clusters.png') }}" alt="Clusters Mean-Shift">
+            <p>Agrupamiento natural de mercadería (Mean-Shift)</p>
+        </div>
+    </div>
+</section>
+
 <section class="table-card">
     <h2>Variables más importantes del modelo</h2>
     <img class="wide-img" src="{{ url_for('static', filename='img/ml_importancia.png') }}" alt="Importancia de variables">

@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
+from sklearn.cluster import DBSCAN, MeanShift
+from sklearn.preprocessing import StandardScaler
 
 
 BASE_STATIC_IMG = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "img")
@@ -20,6 +22,23 @@ CATEGORIAS_ML = ["Ropa", "Electrodoméstico", "Tecnología", "Alimentos", "Muebl
 ROTACIONES_ML = ["Baja", "Media", "Alta"]
 TIPOS_CAMION_ML = ["Camión 01", "Camión 03", "Camión 05", "Camión 06"]
 
+def detectar_anomalias_dbscan(df):
+    # Escalar los datos es obligatorio para algoritmos basados en distancia
+    scaler = StandardScaler()
+    datos_escalados = scaler.fit_transform(df[['cantidad_total', 'tiempo_reposicion_dias']])
+
+    dbscan = DBSCAN(eps=0.5, min_samples=5)
+    df['anomalia_dbscan'] = dbscan.fit_predict(datos_escalados)
+    return df # Los valores -1 son anomalías
+
+def agrupar_comportamiento_meanshift(df):
+    # Escalar datos continuos
+    scaler = StandardScaler()
+    datos_escalados = scaler.fit_transform(df[['cantidad_total', 'demanda_semanal']])
+    
+    ms = MeanShift()
+    df['cluster_meanshift'] = ms.fit_predict(datos_escalados)
+    return df
 
 def crear_dataset_ml(n=1500):
     np.random.seed(42)
@@ -54,6 +73,12 @@ def crear_dataset_ml(n=1500):
 
 def preparar_datos_ml(df):
     df_modelo = df.copy()
+    # Eliminar columnas de clustering antes de entrenar el árbol de decisión
+    if 'anomalia_dbscan' in df_modelo.columns:
+        df_modelo = df_modelo.drop(columns=['anomalia_dbscan'])
+    if 'cluster_meanshift' in df_modelo.columns:
+        df_modelo = df_modelo.drop(columns=['cluster_meanshift'])
+
     df_modelo["riesgo_operativo"] = df_modelo["riesgo_operativo"].map({"Normal": 0, "Riesgo": 1})
     X = df_modelo.drop(columns=["riesgo_operativo"])
     y = df_modelo["riesgo_operativo"]
@@ -66,6 +91,11 @@ def entrenar_modelo_ml(force=False):
     columns_path = os.path.join(ARTIFACT_DIR, "columnas_modelo.pkl")
 
     df = crear_dataset_ml()
+    
+    # ¡NUEVO! Aplicar algoritmos no supervisados al dataset generado
+    df = detectar_anomalias_dbscan(df)
+    df = agrupar_comportamiento_meanshift(df)
+
     X, y = preparar_datos_ml(df)
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -109,6 +139,8 @@ def entrenar_modelo_ml(force=False):
         "dataset": df,
         "metricas": metricas,
         "importancia": importancia,
+        "total_anomalias": int((df['anomalia_dbscan'] == -1).sum()),
+        "total_clusters": int(df['cluster_meanshift'].nunique())
     }
 
 
@@ -149,7 +181,7 @@ def generar_graficos_ml(df, importancia, metricas):
     fig.savefig(os.path.join(BASE_STATIC_IMG, "ml_stock_demanda.png"))
     plt.close(fig)
 
-    corr = df.select_dtypes(include=["int64", "float64"]).corr()
+    corr = df.select_dtypes(include=["number"]).corr()
     fig, ax = plt.subplots(figsize=(8, 6))
     im = ax.imshow(corr)
     fig.colorbar(im)
@@ -187,6 +219,27 @@ def generar_graficos_ml(df, importancia, metricas):
             ax.text(j, i, matriz[i, j], ha="center", va="center")
     fig.tight_layout()
     fig.savefig(os.path.join(BASE_STATIC_IMG, "ml_matriz_confusion.png"))
+    plt.close(fig)
+
+    # Gráfico DBSCAN (Detección de Anomalías)
+    fig, ax = plt.subplots(figsize=(7, 4))
+    colores_dbscan = np.where(df['anomalia_dbscan'] == -1, 'red', 'blue')
+    ax.scatter(df['cantidad_total'], df['tiempo_reposicion_dias'], c=colores_dbscan, alpha=0.6)
+    ax.set_title("Detección de Anomalías Logísticas (DBSCAN)")
+    ax.set_xlabel("Cantidad Total")
+    ax.set_ylabel("Tiempo de Reposición (Días)")
+    fig.tight_layout()
+    fig.savefig(os.path.join(BASE_STATIC_IMG, "ml_dbscan_anomalias.png"))
+    plt.close(fig)
+
+    # Gráfico Mean-Shift (Agrupamiento)
+    fig, ax = plt.subplots(figsize=(7, 4))
+    ax.scatter(df['cantidad_total'], df['demanda_semanal'], c=df['cluster_meanshift'], cmap='viridis', alpha=0.6)
+    ax.set_title("Agrupación de Mercadería (Mean-Shift)")
+    ax.set_xlabel("Cantidad Total")
+    ax.set_ylabel("Demanda Semanal")
+    fig.tight_layout()
+    fig.savefig(os.path.join(BASE_STATIC_IMG, "ml_meanshift_clusters.png"))
     plt.close(fig)
 
 
